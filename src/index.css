@@ -1,0 +1,445 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root{
+    --primary-color: #FF1493;
+    --secondary-color: #191970;
+    --text-color-1: #000;
+    --text-color-2: #fff;
+    --paragraph-color: #000000;
+}
+
+html {
+    font-size: 16px;
+}
+
+body{
+    color: #000;
+    font-family: "Kanit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h4, h6 {
+    font-family: "Kanit", serif;
+    font-style: normal;
+    color: var(--text-color-1);
+    font-weight: 400;
+}
+
+p{
+    color: var(--paragraph-color);
+    font-weight: 400;
+}
+.text-primary {
+    color: var(--primary-color) !important;
+}
+.text-secondary {
+    color: var(--secondary-color) !important;
+}
+.bg-primary {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--text-color-2);
+ padding: 0.5rem 1rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  border: 1px solid var(--primary-color);
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: #fff;
+  color: var(--secondary-color);
+  border: 1px solid var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.btn-secondary{
+  background-color: #fff;
+  color: var(--primary-color);
+  padding: 0.5rem 1.5rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 400;
+  border: 1px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: #fff;
+  color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+}
+
+.btn-secondary-location{
+  background-color: #fff;
+  color: var(--primary-color);
+  padding: 0.5rem 1.5rem;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 400;
+  border: 1px solid var(--primary-color);
+}
+
+.btn-secondary-location:hover {
+  background-color: #fff;
+  color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+}
+
+.btn-check:checked+.btn, .btn.active, .btn.show, .btn:first-child:active, :not(.btn-check)+.btn:active{
+    color: var(--primary-color);
+    background-color: #fff;
+    border-color: var(--primary-color);
+}
+
+.btn-link {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    padding: 0 !important;
+}
+.btn-link:hover {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+.btn-link:focus, .btn-link:active, .btn-link:focus-visible, .btn-link:focus-visible:active {
+    outline: none;
+    box-shadow: unset;
+}
+.search-icon:active{
+  border: unset !important;
+  border-color: unset !important;
+}
+
+.btn-link svg {
+    fill : var(--secondary-color);
+}
+.btn-link:hover svg {
+    fill: var(--primary-color);
+}
+
+.btn-link:active{
+    outline: none;
+    box-shadow: unset;
+    border: unset;
+    border-color: unset;
+    background: unset;
+}
+
+
+/* login screen css start */
+.login-logo {
+  width: 10rem;
+}
+
+.login-section {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  color: var(--text-color-2);
+  background-color: var(--secondary-color);
+}
+
+.login-section .container {
+  position: relative;
+  z-index: 10;
+}
+
+/* Motion Blur Layer */
+.login-section::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), transparent 60%),
+              radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.1), transparent 60%);
+  animation: blurMotion 40s infinite linear;
+  filter: blur(120px);
+  opacity: 0.8;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* More Bubbles - Use multiple pseudo-elements with individual bubbles */
+.login-section .bubbles-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: visible;
+}
+
+/* Each bubble is a div with class .bubble */
+.login-section .bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  filter: blur(3px);
+  animation-timing-function: linear;
+  /* will set size, position, and animation in inline styles */
+}
+
+/* Keyframe for circular revolve */
+@keyframes revolve {
+  0% {
+    transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg);
+  }
+}
+
+/* Blur motion animation */
+@keyframes blurMotion {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(5%, 5%) rotate(180deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg);
+  }
+}
+
+/* Glassmorphism Card */
+.login-section .card {
+  background: rgba(255, 255, 255, 0.15); /* subtle frosted glass */
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.bubble {
+  will-change: transform;
+}
+
+/* login screen css end */
+
+
+/* sidebar css start*/
+.bg-blue {
+  background-color: var(--secondary-color) !important;
+  color: #fff !important;
+}
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20rem;
+  height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 99;
+}
+.sidebar a {
+  color: #fff;
+  padding-left: 0 !important;
+  display: flex;
+  align-items: center;
+  padding-bottom: 1rem;
+  width: fit-content;
+}
+.sidebar a.active, .sidebar a:hover, .sidebar .nav-link:focus, .sidebar .nav-link:hover  {
+  color: var(--primary-color);
+}
+.sidebar-logo {
+  width: 10rem;
+  margin-bottom: 1rem;
+
+}
+.top-bar {
+    height: 5rem;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    padding: 1.25rem;
+    box-shadow: 0 2px 4px #0000001a;
+    width: calc(100% - 20rem);
+    position: fixed;
+    top: 0;
+    left: 20rem;
+    z-index: 99;
+}
+
+.main-content {
+    margin-left: 20rem;
+    margin-top: 3rem;
+    padding: 2rem;
+    box-sizing: border-box;
+    /* height: calc(100vh - 5rem); */
+    background-color: #f1f1f1;
+    /* overflow-y: scroll; */
+}
+.main-content .container {
+  margin-top: 2rem;
+  padding-bottom: 2rem !important;
+}
+.sidebar .nav {
+  height: 70vh;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  flex-wrap: nowrap;
+  scrollbar-width: thin;             /* Firefox */
+  scrollbar-color: transparent transparent; /* Hide thumb and track in Firefox */
+}
+
+/* Hide scrollbar completely by default (Webkit browsers) */
+.sidebar .nav::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* Hide scrollbar buttons/arrows */
+.sidebar .nav::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+/* Show thin scrollbar on hover (Webkit browsers) */
+.sidebar .nav:hover::-webkit-scrollbar {
+  width: 6px; /* thin width */
+  background: transparent; /* keep track transparent */
+}
+
+/* Show scrollbar thumb on hover */
+.sidebar .nav:hover::-webkit-scrollbar-thumb {
+  background-color: white;
+  border-radius: 3px;
+  border: none; /* no border on thumb */
+}
+
+/* Keep scrollbar track transparent always */
+.sidebar .nav:hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* sidebar css end */
+
+
+/*seating css start  */
+.seat {
+  width: 40px;
+  height: 40px;
+  margin: 0 5px;
+  background-color: #eee;
+  cursor: pointer;
+  border-radius: 4px;
+  border: solid #222;
+  border-width: 1px 1px 5px;
+  color: #111;
+}
+
+.seat, .space {
+  --webkit-user-select: none;
+  align-items: center;
+  background-color: #fff;
+  background-color: var(--backgroundColor);
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  font-size: .6em;
+  justify-content: center;
+  min-height: 35px;
+  min-height: var(--seatWidth);
+  min-width: 35px;
+  min-width: var(--seatWidth);
+  transition: all .2s ease-in-out;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.seat.selected {
+  background-color: var(--secondary-color);
+  color: white;
+  border-bottom-color: var(--primary-color);
+}
+
+.seat.booked {
+  background-color: #aaa;
+  cursor: not-allowed;
+  color: white;
+}
+
+.seat.space {
+  border: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.seat-space {
+  background-color: #aaa;
+}
+
+/* seating css end */
+
+/*  event css start*/
+.progress {
+      height: 0.5rem;
+}
+.event-actions a {
+  cursor: pointer;
+}
+.pet-radio {
+  width: fit-content;
+}
+
+.modal.d-block {
+  z-index: 1000 !important;
+}
+/* event css end */
+
+/* media queries */
+@media (min-width: 200px) and (max-width: 768px) {
+    html {
+        font-size:14px
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1300px) {
+    html {
+        font-size:14px
+    }
+}
+
+@media (min-width: 1800px) and (max-width: 2000px) {
+    html {
+        font-size:18px
+    }
+}
+
+@media (min-width: 2001px) {
+    html {
+        font-size:20px
+    }
+}
