@@ -22,6 +22,8 @@ import MediaUpload from '../components/mediaManager/mediaUpload'
 import MediaLibraryManager from '../components/mediaManager/mediaLibraryManager';
 import ForgotPassword from '../pages/forgotpassword';
 import ForgotPasswordForm from '../components/auth/forgot-password-form';
+import MyBookings from '../pages/myBookings';
+import AdminBooking from '../components/events/adminBooking';
 
 
 function ProtectedRoutes() {
@@ -152,6 +154,16 @@ function ProtectedRoutes() {
       <Route path='/media' element={
         <MainLayout>
           <MediaLibraryManager />
+        </MainLayout>
+        } />
+      <Route path='/my-bookings' element={
+        <MainLayout>
+          <MyBookings />
+        </MainLayout>
+        } />
+      <Route path='/admin-booking' element={
+        <MainLayout>
+          <AdminBooking />
         </MainLayout>
         } />
     </Switch>

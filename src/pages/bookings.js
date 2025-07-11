@@ -26,31 +26,68 @@ const BookingsList = () => {
 
   const columns = [
     { header: "#" },
-    { header: "User" },
-    { header: "Event" },
-    { header: "Seats" },
-    { header: "Amount" },
+          { header: "User" },
+      { header: "Event" },
+      { header: "Seats" },
+      { header: "Amount" },
     { header: "Status" },
     { header: "Booked At" },
     { header: "Actions" }
   ];
 
-  const renderRow = (booking, index) => (
-    <tr key={booking._id}>
-      <td>{(page - 1) * 10 + index + 1}</td>
-      <td>{booking.user || 'N/A'}</td>
-      <td>{booking.event?.title || 'N/A'}</td>
-      <td>{booking.seats}</td>
-      <td>₹{booking.totalPrice}</td>
-      <td>{booking.paymentStatus}</td>
-      <td>{new Date(booking.bookingDate).toLocaleString()}</td>
-      <td>
-        <Button variant="danger" size="sm" onClick={() => handleDelete(booking._id)}>
-          Delete
-        </Button>
-      </td>
-    </tr>
-  );
+  const renderRow = (booking, index) => {
+    // Format seats display - handle double-escaped JSON
+    const formatSeats = (seats) => {
+      if (!seats) return 'N/A';
+      
+      try {
+        let seatsArray;
+        
+        if (typeof seats === 'string') {
+          // Handle double-escaped JSON by parsing twice if needed
+          let parsedSeats = seats;
+          
+          // First, try to parse normally
+          try {
+            seatsArray = JSON.parse(parsedSeats);
+          } catch (firstError) {
+            // If that fails, try parsing the escaped string
+            // Replace escaped quotes with regular quotes
+            parsedSeats = parsedSeats.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+            seatsArray = JSON.parse(parsedSeats);
+          }
+        } else if (Array.isArray(seats)) {
+          seatsArray = seats;
+        } else {
+          return 'N/A';
+        }
+        
+        return seatsArray.map(seat => 
+          `${seat.section} Row ${seat.row} Seat Number ${seat.seatNumber}`
+        ).join(', ');
+      } catch (error) {
+        console.error('Error parsing seats:', error);
+        return 'N/A';
+      }
+    };
+
+    return (
+      <tr key={booking._id}>
+        <td>{(page - 1) * 10 + index + 1}</td>
+        <td>{booking.user || 'N/A'}</td>
+        <td>{booking.event?.title || 'N/A'}</td>
+        <td>{formatSeats(booking.seats)}</td>
+        <td>₹{booking.totalPrice}</td>
+        <td>{booking.paymentStatus}</td>
+        <td>{new Date(booking.bookingDate).toLocaleString()}</td>
+        <td>
+          <Button variant="danger" size="sm" onClick={() => handleDelete(booking._id)}>
+            Delete
+          </Button>
+        </td>
+      </tr>
+    );
+  };
 
   return (
     <Container className="mt-4">

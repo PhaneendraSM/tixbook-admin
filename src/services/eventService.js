@@ -9,6 +9,13 @@ export const getEvents = async (page = 1, search = "", limit = 10) => {
   return response;
 };
 
+export const getAllEvents = async () => {
+  const response = await apiClient.get(`/api/events`, {
+    params: { limit: 1000 }, // Get a large number to get all events
+  });
+  return response;
+};
+
 export const addEvent = async (eventData) => {
   const response = await apiClient.post(`/api/events`, eventData);
   return response;
@@ -43,7 +50,7 @@ export const getSeatingPlan = async (page = 1, search = "", limit = 10) => {
 
 export const getSeatingPlanById = async (id) => {
   const response = await apiClient.get(`/api/seating?id=${id}`);
-  return response.data;
+  return response.data?.data || response.data;
 };
 
 export const deleteSeatingPlanById = async (id) => {

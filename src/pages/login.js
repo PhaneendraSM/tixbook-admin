@@ -23,6 +23,7 @@ function AdminLogin() {
     try {
       const data = await loginAdmin(email, password);
       localStorage.setItem('adminToken', data.token);
+      localStorage.setItem('user', JSON.stringify(data));
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');

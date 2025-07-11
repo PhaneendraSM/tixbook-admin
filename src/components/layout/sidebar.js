@@ -14,7 +14,9 @@ import {
   LogOut,
   Armchair,
   BookImage,
-  UserCheck
+  UserCheck,
+  Ticket,
+  Plus
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -84,7 +86,27 @@ const Sidebar = () => {
           }
         >
           <ClipboardCheck size={18} className="me-2" />
-          Bookings
+          All Bookings
+        </Nav.Link>
+        <Nav.Link
+          as={NavLink}
+          to="/my-bookings"
+          className={({ isActive }) =>
+            "text-dark" + (isActive ? " active" : "")
+          }
+        >
+          <Ticket size={18} className="me-2" />
+          My Bookings
+        </Nav.Link>
+        <Nav.Link
+          as={NavLink}
+          to="/admin-booking"
+          className={({ isActive }) =>
+            "text-dark" + (isActive ? " active" : "")
+          }
+        >
+          <Plus size={18} className="me-2" />
+          Create Booking
         </Nav.Link>
         <Nav.Link
           as={NavLink}
