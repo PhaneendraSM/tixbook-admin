@@ -26,11 +26,11 @@ const BookingsList = () => {
 
   const columns = [
     { header: "#" },
-          { header: "User" },
+          // { header: "User" },
       { header: "Event" },
       { header: "Seats" },
       { header: "Amount" },
-    { header: "Status" },
+    // { header: "Status" },
     { header: "Booked At" },
     { header: "Actions" }
   ];
@@ -63,7 +63,7 @@ const BookingsList = () => {
         }
         
         return seatsArray.map(seat => 
-          `${seat.section} Row ${seat.row} Seat Number ${seat.seatNumber}`
+          `${seat.section} - Seat Number ${seat.seatNumber}`
         ).join(', ');
       } catch (error) {
         console.error('Error parsing seats:', error);
@@ -74,11 +74,11 @@ const BookingsList = () => {
     return (
       <tr key={booking._id}>
         <td>{(page - 1) * 10 + index + 1}</td>
-        <td>{booking.user || 'N/A'}</td>
+        {/* <td>{booking.user || 'N/A'}</td> */}
         <td>{booking.event?.title || 'N/A'}</td>
         <td>{formatSeats(booking.seats)}</td>
-        <td>₹{booking.totalPrice}</td>
-        <td>{booking.paymentStatus}</td>
+        <td> {booking?.totalPrice || 'N/A'}</td>
+        {/* <td>{booking.paymentStatus}</td> */}
         <td>{new Date(booking.bookingDate).toLocaleString()}</td>
         <td>
           <Button variant="danger" size="sm" onClick={() => handleDelete(booking._id)}>

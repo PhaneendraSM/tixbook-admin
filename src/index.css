@@ -300,50 +300,43 @@ p{
   margin-top: 2rem;
   padding-bottom: 2rem !important;
 }
-.sidebar .nav {
+/* .sidebar .nav {
   height: 70vh;
   overflow-x: hidden;
   overflow-y: scroll;
   flex-wrap: nowrap;
-  scrollbar-width: thin;             /* Firefox */
-  scrollbar-color: transparent transparent; /* Hide thumb and track in Firefox */
+  scrollbar-width: thin;       
+  scrollbar-color: #FF1493 #fff;
+} */
+
+.sidebar .nav {
+  height: 70vh;
+  overflow-x: hidden;
+  overflow-y: hidden; 
+  flex-wrap: nowrap;
+  /* scrollbar-width: thin;             
+  scrollbar-color: #FF1493 #fff; */
 }
 
-/* Hide scrollbar completely by default (Webkit browsers) */
+.sidebar .nav:hover {
+  overflow-y: auto; /* Show scrollbar on hover */
+}
 .sidebar .nav::-webkit-scrollbar {
-  width: 0;
-  background: transparent;
+  width: 8px; /* Adjust as needed */
 }
 
-/* Hide scrollbar buttons/arrows */
+.sidebar .nav::-webkit-scrollbar-track {
+  background: transparent; /* Hide the track */
+}
+
+.sidebar .nav::-webkit-scrollbar-thumb {
+  background-color: #FF1493;
+  border-radius: 4px;
+}
+
 .sidebar .nav::-webkit-scrollbar-button {
   display: none;
-  height: 0;
-  width: 0;
-  background: transparent;
-  margin: 0;
-  padding: 0;
 }
-
-/* Show thin scrollbar on hover (Webkit browsers) */
-.sidebar .nav:hover::-webkit-scrollbar {
-  width: 6px; /* thin width */
-  background: transparent; /* keep track transparent */
-}
-
-/* Show scrollbar thumb on hover */
-.sidebar .nav:hover::-webkit-scrollbar-thumb {
-  background-color: white;
-  border-radius: 3px;
-  border: none; /* no border on thumb */
-}
-
-/* Keep scrollbar track transparent always */
-.sidebar .nav:hover::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-
 /* sidebar css end */
 
 

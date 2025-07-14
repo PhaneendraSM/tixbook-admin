@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Edit2, Plus, Trash2, Save, RotateCcw, Menu, X, Check, GripVertical } from 'lucide-react';
+import { Edit2, Plus, Trash2, Save, RotateCcw, Menu, X, Check, GripVertical, Info } from 'lucide-react';
 import { seatingPlan, getSeatingPlanById, updateSeatingPlan } from '../services/eventService';
 
 const SeatMapEditor = () => {
@@ -82,6 +82,9 @@ const SeatMapEditor = () => {
   const [seatMapName, setSeatMapName] = useState('Untitled Seat Map');
   const [editingSeatMapName, setEditingSeatMapName] = useState(false);
   const [seatMapNameEditValue, setSeatMapNameEditValue] = useState('');
+  const [showRowColorModal, setShowRowColorModal] = useState(false);
+  const [selectedRowForColor, setSelectedRowForColor] = useState(null);
+  const [rowColorValue, setRowColorValue] = useState('#96CEB4');
 
   // Row name editing state
   const [editingRowName, setEditingRowName] = useState(null);
@@ -472,6 +475,45 @@ const SeatMapEditor = () => {
     showToast(`Seat color reset to category default`);
   };
 
+  const changeRowColor = (rowId) => {
+    setSelectedRowForColor(rowId);
+    setRowColorValue('#96CEB4'); // Default color
+    setShowRowColorModal(true);
+    setShowRowMenu(null);
+  };
+
+  const handleRowColorSubmit = () => {
+    if (!selectedRowForColor) return;
+    
+    setSeatMap(prev => ({
+      ...prev,
+      [selectedRowForColor]: prev[selectedRowForColor].map(seat => {
+        if (seat.type === 'seat') {
+          return { ...seat, color: rowColorValue };
+        }
+        return seat;
+      })
+    }));
+    
+    showToast(`Row "${selectedRowForColor}" color updated to ${rowColorValue}`);
+    setShowRowColorModal(false);
+    setSelectedRowForColor(null);
+  };
+
+  const resetRowColor = (rowId) => {
+    setSeatMap(prev => ({
+      ...prev,
+      [rowId]: prev[rowId].map(seat => {
+        if (seat.type === 'seat') {
+          return { ...seat, color: null }; // Reset to category default
+        }
+        return seat;
+      })
+    }));
+    showToast(`Row "${rowId}" color reset to category defaults`);
+    setShowRowMenu(null);
+  };
+
   const handleFieldKeyDown = (e) => {
     if (e.key === 'Enter') handleFieldEdit();
     else if (e.key === 'Escape') setEditingField(null);
@@ -522,9 +564,25 @@ const SeatMapEditor = () => {
     showToast(`${count} new seat(s) added to row ${rowId}`);
   };
 
-  const addSpaceToRow = (rowId) => {
+  const addSpaceToRow = (rowId, seatIndex = null) => {
     const newSpace = { id: `${rowId}-space-${Date.now()}`, label: '', type: 'space' };
-    setSeatMap(prev => ({ ...prev, [rowId]: [...prev[rowId], newSpace] }));
+    
+    if (seatIndex !== null) {
+      // Insert space to the left of the selected seat
+      setSeatMap(prev => ({
+        ...prev,
+        [rowId]: [
+          ...prev[rowId].slice(0, seatIndex),
+          newSpace,
+          ...prev[rowId].slice(seatIndex)
+        ]
+      }));
+      showToast(`Space added to the left of seat ${seatMap[rowId][seatIndex]?.label || seatIndex + 1}`);
+    } else {
+      // Add space at the end of the row (for row menu)
+      setSeatMap(prev => ({ ...prev, [rowId]: [...prev[rowId], newSpace] }));
+      showToast(`Space added to the end of row ${rowId}`);
+    }
     setShowRowMenu(null);
   };
 
@@ -532,6 +590,51 @@ const SeatMapEditor = () => {
     const seatCount = seatMap[rowId].filter(s => s.type === 'seat').length;
     setSeatMap(prev => { const newMap = { ...prev }; delete newMap[rowId]; return newMap; });
     showToast(`Row ${rowId} deleted (${seatCount} seats removed)`, 'danger');
+    setShowRowMenu(null);
+  };
+
+  const duplicateRow = (rowId) => {
+    const originalRow = seatMap[rowId];
+    if (!originalRow) return;
+
+    // Find the highest seat number from the row being duplicated
+    const rowSeats = originalRow.filter(s => s.type === 'seat');
+    const seatNumbers = rowSeats.map(s => parseInt(s.label.replace(/\D/g, ''), 10)).filter(n => !isNaN(n));
+    const nextSeatNumber = seatNumbers.length > 0 ? Math.max(...seatNumbers) + 1 : 1;
+
+    // Generate new row name
+    const baseName = rowId.replace(/\s+\d+$/, ''); // Remove any existing number suffix
+    const existingRows = Object.keys(seatMap).filter(key => key.startsWith(baseName));
+    const newRowName = `${baseName} ${existingRows.length + 1}`;
+
+    // Duplicate seats with new numbers
+    const duplicatedSeats = originalRow.map((seat, index) => {
+      if (seat.type === 'space') {
+        return {
+          ...seat,
+          id: `${newRowName.toLowerCase().replace(/ /g, '')}-space-${Date.now()}-${index}`
+        };
+      } else {
+        const newSeatNumber = nextSeatNumber + index;
+        return {
+          ...seat,
+          id: `${newRowName.toLowerCase().replace(/ /g, '')}-${newSeatNumber}`,
+          label: newSeatNumber.toString()
+        };
+      }
+    });
+
+    // Insert the new row after the original row
+    const rowEntries = Object.entries(seatMap);
+    const originalIndex = rowEntries.findIndex(([key]) => key === rowId);
+    const newRowEntries = [...rowEntries];
+    newRowEntries.splice(originalIndex + 1, 0, [newRowName, duplicatedSeats]);
+    
+    const newSeatMap = Object.fromEntries(newRowEntries);
+    setSeatMap(newSeatMap);
+    
+    const seatCount = duplicatedSeats.filter(s => s.type === 'seat').length;
+    showToast(`Row "${newRowName}" duplicated with ${seatCount} seats (starting from seat ${nextSeatNumber})`);
     setShowRowMenu(null);
   };
   
@@ -741,14 +844,14 @@ const SeatMapEditor = () => {
           const formattedSeats = rowSeats.map((seat, index) => {
             const categoryColor = categories[seat.category]?.color || '#CCCCCC';
             return {
-              seatNumber: index + 1,
+              seatNumber: seat.type === 'seat' ? parseInt(seat.label) || (index + 1) : null,
               id: seat.id || null,
               label: seat.label || '',
               type: seat.type,
               level: seat.category || '',
               price: seat.type === 'seat' ? seat.price ?? 0 : null,
               reserved: seat.type === 'seat' ? seat.reserved || false : false,
-              color: seat.type === 'seat' ? categoryColor : ''
+              color: seat.type === 'seat' ? (seat.color || categoryColor) : ''
             };
           });
 
@@ -1076,7 +1179,7 @@ const SeatMapEditor = () => {
                 <button 
                   onClick={refreshCategoriesFromSeatMap} 
                   className="btn btn-outline-secondary btn-sm" 
-                  title="Refresh Categories from Seat Map"
+                  title="Reset Categories from Default Values"
                 >
                   <RotateCcw size={16} />
                 </button>
@@ -1213,6 +1316,65 @@ const SeatMapEditor = () => {
     showToast('Categories refreshed from seat map data');
   };
 
+  const renderRowColorModal = () => {
+    if (!showRowColorModal) return null;
+
+    return (
+      <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50 }}>
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Change Row Color - {selectedRowForColor}</h5>
+              <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowRowColorModal(false)}></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label className="form-label">Select Color:</label>
+                <div className="d-flex align-items-center gap-3">
+                  <input 
+                    type="color" 
+                    value={rowColorValue} 
+                    onChange={(e) => setRowColorValue(e.target.value)} 
+                    className="form-control form-control-color" 
+                    style={{ width: '60px', height: '60px' }}
+                  />
+                  <input 
+                    type="text" 
+                    value={rowColorValue} 
+                    onChange={(e) => setRowColorValue(e.target.value)} 
+                    className="form-control" 
+                    placeholder="#000000"
+                  />
+                </div>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Preview:</label>
+                <div 
+                  className="p-3 rounded" 
+                  style={{ 
+                    backgroundColor: rowColorValue, 
+                    minHeight: '40px',
+                    border: '1px solid #ced4da'
+                  }}
+                >
+                  <span className="text-white font-weight-bold">
+                    Sample text on {rowColorValue}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button onClick={handleRowColorSubmit} className="btn btn-primary d-flex align-items-center">
+                <Check size={16} className="me-2" /> Apply Color
+              </button>
+              <button onClick={() => setShowRowColorModal(false)} className="btn btn-secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <section className='seatmap-container'>
     <div className="container-fluid p-4 bg-light min-vh-100 font-sans" onClick={() => setSelectedSeat(null)}>
@@ -1290,8 +1452,9 @@ const SeatMapEditor = () => {
                     className="bg-light text-dark d-flex align-items-center justify-content-center font-weight-bold rounded shadow-sm p-2" 
                     style={{ minWidth: '300px' }} 
                     onDoubleClick={() => { setEditingSeatMapName(true); setSeatMapNameEditValue(seatMapName); }}
+                    title={`Double-click to edit`}
                   >
-                    {seatMapName}
+                    {seatMapName} <Info size={16} className="text-muted ms-2" />
                   </div>
                 )}
                 {!editingSeatMapName && (
@@ -1375,7 +1538,8 @@ const SeatMapEditor = () => {
                     transform: draggedRow === rowId ? 'rotate(2deg)' : 'none'
                   }}
                 >
-                  <div className="position-relative d-inline-block" style={{ width: '100px' }} onClick={e => e.stopPropagation()}>
+                                    <div className="position-relative d-inline-flex align-items-center" style={{ width: '110px' }} onClick={e => e.stopPropagation()}>
+                
                     {editingRowName === rowId ? (
                       <div className="d-flex flex-column align-items-end gap-1">
                         <input 
@@ -1391,27 +1555,37 @@ const SeatMapEditor = () => {
                         />
                         <div className="d-flex gap-1">
                           <button onClick={() => handleRowNameUpdate(rowId)} className="btn btn-success btn-sm rounded-circle p-1">
-                            <Check size={10} />
+                            <Check size={15} />
                           </button>
                           <button onClick={() => { setEditingRowName(null); setRowNameEditValue(''); }} className="btn btn-danger btn-sm rounded-circle p-1">
-                            <X size={10} />
+                            <X size={15} />
                           </button>
                         </div>
                       </div>
                     ) : (
                       <div 
-                        className="text-end text-muted text-truncate font-weight-bold p-1 rounded" 
+                        className="d-flex align-items-center justify-content-end p-1 rounded" 
                         style={{ 
                           minHeight: '32px',
                           cursor: 'pointer',
-                          transition: 'background-color 0.2s ease'
+                          transition: 'all 0.2s ease',
+                          border: '1px solid transparent'
                         }}
-                        onDoubleClick={() => { setEditingRowName(rowId); setRowNameEditValue(rowId); }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                        title={`${rowId} (double-click to edit)`}
+                        onClick={() => { setEditingRowName(rowId); setRowNameEditValue(rowId); }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f8f9fa';
+                          e.currentTarget.style.borderColor = '#dee2e6';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.borderColor = 'transparent';
+                        }}
+                        title={`Click to edit row name: ${rowId}`}
                       >
-                        {rowId}
+                        <span className="text-muted text-truncate font-weight-bold me-2" style={{ maxWidth: '80px' }}>
+                          {rowId}
+                        </span>
+                        <Info size={16} className="text-muted" />
                       </div>
                     )}
                   </div>
@@ -1445,6 +1619,10 @@ const SeatMapEditor = () => {
                           <button onClick={() => addSeatsToRow(rowId, bulkAddCount)} className="btn btn-outline-info btn-sm flex-grow-1">Add Seats</button>
                         </div>
                         <button onClick={() => addSpaceToRow(rowId)} className="dropdown-item">Add Space</button>
+                        <button onClick={() => duplicateRow(rowId)} className="dropdown-item">Duplicate Row</button>
+                        <div className="dropdown-divider"></div>
+                        <button onClick={() => changeRowColor(rowId)} className="dropdown-item">Change Row Color</button>
+                        <button onClick={() => resetRowColor(rowId)} className="dropdown-item">Reset Row Color</button>
                         <div className="dropdown-divider"></div>
                         <button onClick={() => deleteRow(rowId)} className="dropdown-item text-danger">Delete Row</button>
                       </div>
@@ -1458,6 +1636,7 @@ const SeatMapEditor = () => {
 
           {renderFieldEditModal()}
           {renderCategoryManager()}
+          {renderRowColorModal()}
 
           {toasts.visible && (
             <div className={`toast align-items-center text-white bg-${toasts.type === 'success' ? 'dark' : 'danger'} border-0 show`} role="alert" aria-live="assertive" aria-atomic="true" style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 100 }}>

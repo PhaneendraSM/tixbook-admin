@@ -99,6 +99,12 @@ const AdminBooking = () => {
   };
 
   const handleSeatClick = (seat) => {
+    // Check if this is a space seat (empty level and price)
+    if (!seat.level && seat.price === 0) {
+      toast.error('This is an aisle space and cannot be booked');
+      return;
+    }
+    
     if (seat.reserved) {
       toast.error('This seat is already reserved');
       return;
@@ -171,12 +177,28 @@ const AdminBooking = () => {
         customerEmail: '',
         customerPhone: ''
       });
+      
       setShowBookingModal(false);
     } catch (err) {
       toast.error('Failed to create booking. Please try again.');
       console.error('Booking error:', err);
     } finally {
       setLoading(false);
+      
+      // Refresh the seating layout to show updated seat status
+      if (selectedEvent && selectedEvent.seatingPlan) {
+        // Use setTimeout to ensure this runs after the loading state is cleared
+        setTimeout(async () => {
+          try {
+            console.log('Refreshing seating plan after booking...');
+            const seatingPlanData = await getSeatingPlanById(selectedEvent.seatingPlan);
+            console.log('New seating plan data:', seatingPlanData);
+            setSeatingPlan(seatingPlanData);
+          } catch (err) {
+            console.error('Error refreshing seating plan:', err);
+          }
+        }, 100);
+      }
     }
   };
 
@@ -234,39 +256,63 @@ const AdminBooking = () => {
         //   />
         // );
         row.seats.forEach((seat, seatIndex) => {
-          const seatObj = {
-            ...seat,
-            seatId: seat._id,
-            section: section.name,
-            row: row.rowNumber
-          };
-          const seatX = sectionLabelWidth + seatIndex * (seatWidth + seatGap);
-          const seatY = y;
-          const isSelected = selectedSeats.some(s => s.seatId === seat._id);
-          elements.push(
-            <Group key={`seat-${sectionIndex}-${rowIndex}-${seatIndex}`} onClick={() => handleSeatClick(seatObj)}>
+          // Check if this is a space seat (empty level and price)
+          const isSpace = !seat.level && seat.price === 0;
+          
+          if (isSpace) {
+            // Render space/aisle - just leave empty space
+            const seatX = sectionLabelWidth + seatIndex * (seatWidth + seatGap);
+            const seatY = y;
+            elements.push(
               <Rect
+                key={`space-${sectionIndex}-${rowIndex}-${seatIndex}`}
                 x={seatX}
                 y={seatY}
                 width={seatWidth}
                 height={seatHeight}
-                fill={isSelected ? '#1976d2' : seat.reserved ? '#e74c3c' : '#43a047'}
-                stroke={isSelected ? '#fff' : seat.reserved ? '#c0392b' : '#222'}
-                strokeWidth={isSelected ? 2 : 1}
-                cornerRadius={6}
-                opacity={seat.reserved ? 0.8 : 1}
+                fill="transparent"
+                stroke="#ddd"
+                strokeWidth={1}
+                strokeDasharray={[3, 3]}
+                opacity={0.5}
               />
-              <Text
-                x={seatX}
-                y={seatY + 7}
-                width={seatWidth}
-                text={`${seat.seatNumber}`}
-                fontSize={12}
-                fill={isSelected ? '#fff' : seat.reserved ? '#fff' : '#222'}
-                align="center"
-              />
-            </Group>
-          );
+            );
+          } else {
+            // Render regular seat
+            const seatObj = {
+              ...seat,
+              seatId: seat._id,
+              section: section.name,
+              row: row.rowNumber
+            };
+            const seatX = sectionLabelWidth + seatIndex * (seatWidth + seatGap);
+            const seatY = y;
+            const isSelected = selectedSeats.some(s => s.seatId === seat._id);
+            elements.push(
+              <Group key={`seat-${sectionIndex}-${rowIndex}-${seatIndex}`} onClick={() => handleSeatClick(seatObj)}>
+                <Rect
+                  x={seatX}
+                  y={seatY}
+                  width={seatWidth}
+                  height={seatHeight}
+                  fill={isSelected ? '#1976d2' : seat.reserved ? '#e74c3c' : '#43a047'}
+                  stroke={isSelected ? '#fff' : seat.reserved ? '#c0392b' : '#222'}
+                  strokeWidth={isSelected ? 2 : 1}
+                  cornerRadius={6}
+                  opacity={seat.reserved ? 0.8 : 1}
+                />
+                <Text
+                  x={seatX}
+                  y={seatY + 7}
+                  width={seatWidth}
+                  text={`${seat.seatNumber}`}
+                  fontSize={12}
+                  fill={isSelected ? '#fff' : seat.reserved ? '#fff' : '#222'}
+                  align="center"
+                />
+              </Group>
+            );
+          }
         });
         maxRowSeats = Math.max(maxRowSeats, row.seats.length);
         y += seatHeight + rowGap;

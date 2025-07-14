@@ -43,27 +43,45 @@ const MyBookings = () => {
     { header: "Customer" },
     { header: "Event" },
     { header: "Seats" },
-    { header: "Amount" },
-    { header: "Status" },
     { header: "Booked At" },
     { header: "Actions" }
   ];
 
   const renderRow = (booking, index) => {
-    // Parse seats if it's a string
-    let seatsInfo = 'N/A';
-    if (booking.seats) {
+    // Format seats display
+    const formatSeats = (seats) => {
+      if (!seats) return 'N/A';
+      
       try {
-        const seats = typeof booking.seats === 'string' ? JSON.parse(booking.seats) : booking.seats;
-        if (Array.isArray(seats)) {
-          seatsInfo = seats.map(seat => seat.seatId).join(', ');
+        let seatsArray;
+        
+        if (typeof seats === 'string') {
+          // Handle double-escaped JSON by parsing twice if needed
+          let parsedSeats = seats;
+          
+          // First, try to parse normally
+          try {
+            seatsArray = JSON.parse(parsedSeats);
+          } catch (firstError) {
+            // If that fails, try parsing the escaped string
+            // Replace escaped quotes with regular quotes
+            parsedSeats = parsedSeats.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+            seatsArray = JSON.parse(parsedSeats);
+          }
+        } else if (Array.isArray(seats)) {
+          seatsArray = seats;
         } else {
-          seatsInfo = booking.seats;
+          return 'N/A';
         }
-      } catch (e) {
-        seatsInfo = booking.seats;
+        
+        return seatsArray.map(seat => 
+          `${seat.section} - Seat Number : ${seat.seatNumber}`
+        ).join(', ');
+      } catch (error) {
+        console.error('Error parsing seats:', error);
+        return 'N/A';
       }
-    }
+    };
 
     return (
       <tr key={booking._id}>
@@ -91,10 +109,8 @@ const MyBookings = () => {
           </div>
         </td>
         <td>
-          <small>{seatsInfo}</small>
+          <small>{formatSeats(booking.seats)}</small>
         </td>
-        <td>₹{booking.totalPrice || 0}</td>
-        <td>{getStatusBadge(booking.paymentStatus)}</td>
         <td>{new Date(booking.bookingDate).toLocaleString()}</td>
         <td>
           <Button variant="danger" size="sm" onClick={() => handleDelete(booking._id)}>
@@ -125,14 +141,14 @@ const MyBookings = () => {
       
       <Card className="mb-4">
         <Card.Body>
-          <div className='pb-4'>
+          {/* <div className='pb-4'>
             <SearchField
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onSubmit={handleSearchSubmit}
               placeholder="Search bookings by customer name, email, or event..."
             />
-          </div>
+          </div> */}
           
           {loading ? (
             <div className="text-center py-4">
