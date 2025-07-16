@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import DynamicForm from '../../components/common/form';
+import { Spinner } from 'react-bootstrap';
 import * as categoryService from '../../services/categoryService';
 import * as genreService from '../../services/genreService';
 import * as languageService from '../../services/languageService';
@@ -13,10 +14,12 @@ const EventForm = ({ initialData, onSubmit, onCancel }) => {
     artist: [],
     pricing: [],
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
+        setIsLoading(true);
         const [langRes, genreRes, categoryRes, artistRes] = await Promise.all([
           languageService.list(),
           genreService.list(),
@@ -37,6 +40,8 @@ console.log("Artist response:", artistRes);
         });
       } catch (error) {
         console.error("Failed to fetch form options", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -95,6 +100,18 @@ console.log("Artist response:", artistRes);
     //   ], required: true
     // },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-5">
+        <Spinner animation="border" role="status" className="mb-3">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <h5>Loading form options...</h5>
+        <p className="text-muted">Please wait while we load event details</p>
+      </div>
+    );
+  }
 
   return (
     <DynamicForm

@@ -1592,7 +1592,7 @@ const SeatMapEditor = () => {
                   <div className="d-flex flex-nowrap">{seats.map((seat, seatIndex) => renderSeat(seat, rowId, seatIndex))}</div>
                   <div className="position-relative d-flex align-items-center gap-1" style={{ width: '80px' }}>
                     <button 
-                      className="btn btn-outline-secondary btn-sm rounded-circle p-1"
+                      className="btn btn-outline-secondary btn-sm rounded-circle"
                       style={{ cursor: 'grab' }}
                       title="Drag to reorder row"
                       onMouseDown={(e) => e.stopPropagation()}
