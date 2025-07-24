@@ -235,6 +235,7 @@ const SeatMapEditor = () => {
           seatmap.sections.forEach(section => {
             console.log('Processing section:', section.name);
             const sectionSeats = [];
+            let seatNumber = 1; // Start seat numbering at 1 for each section (not per row)
             
             // Process each row in the section
             if (Array.isArray(section.rows)) {
@@ -243,32 +244,43 @@ const SeatMapEditor = () => {
                 // Add seats from this row to the section
                 if (Array.isArray(row.seats)) {
                   row.seats.forEach(seat => {
-                    const categoryId = (seat.level || '').toLowerCase();
-                    
-                    // Dynamically create category if it doesn't exist
-                    if (categoryId && !extractedCategories[categoryId]) {
-                      const categoryName = seat.level || categoryId.charAt(0).toUpperCase() + categoryId.slice(1);
-                      const defaultPrice = categoryId === 'economy' ? 500 : 1000; // Default price for economy
-                      extractedCategories[categoryId] = {
-                        name: categoryName,
-                        price: defaultPrice,
-                        color: categoryColors[categoryId] || '#CCCCCC'
-                      };
-                      console.log('Created new category:', categoryId, extractedCategories[categoryId]);
-                    }
+                    // Detect if this is a space (aisle)
+                    const isSpace = (!seat.level || seat.level === '') && (!seat.price || seat.price === 0);
 
-                    const transformedSeat = {
-                      id: seat._id || seat.id,
-                      label: seat.label?.toString() || seat.seatNumber?.toString() || '',
-                      type: 'seat',
-                      category: categoryId,
-                      price: Number(seat.price) || 0,
-                      reserved: Boolean(seat.reserved),
-                      name: seat.name,
-                      color: seat.color || null
-                    };
-                    console.log('Transformed seat:', transformedSeat);
-                    sectionSeats.push(transformedSeat);
+                    if (isSpace) {
+                      // Add a space item, do NOT increment seatNumber
+                      sectionSeats.push({
+                        id: seat._id || seat.id || `space-${Date.now()}-${Math.random()}`,
+                        label: '', // No label for space
+                        type: 'space'
+                      });
+                    } else {
+                      // This is a real seat, assign the next seat number
+                      const categoryId = (seat.level || '').toLowerCase();
+                      // Dynamically create category if it doesn't exist
+                      if (categoryId && !extractedCategories[categoryId]) {
+                        const categoryName = seat.level || categoryId.charAt(0).toUpperCase() + categoryId.slice(1);
+                        const defaultPrice = categoryId === 'economy' ? 500 : 1000; // Default price for economy
+                        extractedCategories[categoryId] = {
+                          name: categoryName,
+                          price: defaultPrice,
+                          color: categoryColors[categoryId] || '#CCCCCC'
+                        };
+                        console.log('Created new category:', categoryId, extractedCategories[categoryId]);
+                      }
+
+                      sectionSeats.push({
+                        id: seat._id || seat.id,
+                        label: seatNumber.toString(),
+                        type: 'seat',
+                        category: categoryId,
+                        price: Number(seat.price) || 0,
+                        reserved: Boolean(seat.reserved),
+                        name: seat.name,
+                        color: seat.color || null
+                      });
+                      seatNumber++; // Only increment for real seats
+                    }
                   });
                 }
 
@@ -592,6 +604,28 @@ const SeatMapEditor = () => {
     showToast(`Row ${rowId} deleted (${seatCount} seats removed)`, 'danger');
     setShowRowMenu(null);
   };
+  
+  // const handleAddRowForCategory = (categoryId) => {
+  //     const category = categories[categoryId];
+  //     if (!category) return;
+
+  //     const baseName = category.name;
+  //     const existingRows = Object.keys(seatMap).filter(key => key.startsWith(baseName));
+  //     const newRowName = existingRows.length > 0 ? `${baseName} ${existingRows.length + 1}` : baseName;
+      
+  //     const defaultSeats = [
+  //       { id: `${newRowName.toLowerCase().replace(/ /g,'')}1`, label: '1', type: 'seat', category: categoryId, price: category.price || 0 },
+  //       { id: `${newRowName.toLowerCase().replace(/ /g,'')}2`, label: '2', type: 'seat', category: categoryId, price: category.price || 0 },
+  //       { id: `${newRowName.toLowerCase().replace(/ /g,'')}3`, label: '3', type: 'seat', category: categoryId, price: category.price || 0 },
+  //     ];
+
+  //     setSeatMap(prev => ({
+  //       ...prev,
+  //       [newRowName]: defaultSeats
+  //     }));
+  //     showToast(`New row ${newRowName} added`);
+  //     setShowCategoryManager(false);
+  // };
 
   const duplicateRow = (rowId) => {
     const originalRow = seatMap[rowId];
@@ -1277,6 +1311,54 @@ const SeatMapEditor = () => {
                 </small>
               </div>
             </div>
+            
+            {/* Add SeatMap Name field */}
+            <div className="d-flex align-items-center mb-3">
+              <div className="position-relative d-inline-block" onClick={e => e.stopPropagation()}>
+                {editingSeatMapName ? (
+                  <div className="d-flex align-items-center">
+                    <input 
+                      ref={seatMapNameInputRef}
+                      type="text" 
+                      value={seatMapNameEditValue} 
+                      onChange={(e) => setSeatMapNameEditValue(e.target.value)} 
+                      onKeyDown={handleSeatMapNameKeyDown} 
+                      className="form-control text-center me-2" 
+                      style={{ width: '300px' }}
+                      placeholder="Enter seat map name"
+                    />
+                    <button onClick={handleSeatMapNameUpdate} className="btn btn-success btn-sm me-2 rounded-circle">
+                      <Check size={16} />
+                    </button>
+                    <button onClick={() => setEditingSeatMapName(false)} className="btn btn-danger btn-sm rounded-circle">
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <div 
+                    className="bg-light text-dark d-flex align-items-center justify-content-center font-weight-bold rounded shadow-sm p-2" 
+                    style={{ minWidth: '300px' }} 
+                    onDoubleClick={() => { setEditingSeatMapName(true); setSeatMapNameEditValue(seatMapName); }}
+                  >
+                    {seatMapName}
+                  </div>
+                )}
+                {!editingSeatMapName && (
+                  <button 
+                    onClick={() => { setEditingSeatMapName(true); setSeatMapNameEditValue(seatMapName); }} 
+                    title="Edit Seat Map Name" 
+                    className="btn btn-outline-secondary btn-sm position-absolute rounded-circle" 
+                    style={{ top: '-10px', right: '-10px', opacity: 0, transition: 'opacity 0.2s' }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={e => e.currentTarget.style.opacity = '0'}
+                  >
+                    <Edit2 size={12}/>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="text-muted mt-2">Total Seats: <span className="font-weight-bold">{getTotalSeats()}</span></div>
           </div>
         </div>
       </div>
@@ -1369,6 +1451,7 @@ const SeatMapEditor = () => {
               </button>
               <button onClick={() => setShowRowColorModal(false)} className="btn btn-secondary">Cancel</button>
             </div>
+            {renderSeatPopup()}
           </div>
         </div>
       </div>

@@ -118,7 +118,7 @@ const AdminBooking = () => {
       }
     });
   };
-
+ 
   const handleEventSelect = async (event) => {
     setSelectedEvent(event);
     setSelectedSeats([]);
@@ -257,8 +257,12 @@ const AdminBooking = () => {
         // );
         row.seats.forEach((seat, seatIndex) => {
           // Check if this is a space seat (empty level and price)
-          const isSpace = !seat.level && seat.price === 0;
-          
+          // const isSpace = !seat.level && seat.price === 0;
+          const isSpace = (
+            (!seat.level || seat.level === '') &&
+            (seat.price === 0 || seat.price === null) &&
+            (seat.seatNumber === null || seat.seatNumber === undefined)
+          ); 
           if (isSpace) {
             // Render space/aisle - just leave empty space
             const seatX = sectionLabelWidth + seatIndex * (seatWidth + seatGap);

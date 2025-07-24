@@ -93,12 +93,12 @@ console.log("Artist response:", artistRes);
     // {
     //   name: 'pricing', label: 'Pricing', type: 'select', options: options.pricing, required: false
     // },
-    // {
-    //   name: 'layout', label: 'Layout', type: 'select', options: [
-    //     { value: 'indoor', label: 'Indoor' },
-    //     { value: 'outdoor', label: 'Outdoor' }
-    //   ], required: true
-    // },
+    {
+      name: 'layout', label: 'Layout', type: 'select', options: [
+        { value: 'indoor', label: 'Indoor' },
+        { value: 'outdoor', label: 'Outdoor' }
+      ], required: true
+    },
   ];
 
   if (isLoading) {

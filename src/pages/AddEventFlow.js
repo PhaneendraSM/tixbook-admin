@@ -43,9 +43,15 @@ const AddEventFlow = () => {
       if (isEditMode) {
         await updateEvent(eventId, updatedData);
         toast.success('Event updated successfully!');
+      } else if (savedEventId) {
+        // If we have a saved event ID, update the existing event
+        await updateEvent(savedEventId, updatedData);
+        toast.success('Event updated successfully!');
       } else {
-        const newEvent = await addEvent(updatedData);
-        setSavedEventId(newEvent._id);
+        // First time saving - create new event
+        const response = await addEvent(updatedData);
+        const newEventId = response.data._id || response._id;
+        setSavedEventId(newEventId);
         toast.success('Event saved successfully!');
       }
       
@@ -77,9 +83,15 @@ const AddEventFlow = () => {
       if (isEditMode) {
         await updateEvent(eventId, eventData);
         toast.success('Event updated successfully!');
+      } else if (savedEventId) {
+        // If we have a saved event ID, update the existing event
+        await updateEvent(savedEventId, eventData);
+        toast.success('Event updated successfully!');
       } else {
-        const newEvent = await addEvent(eventData);
-        setSavedEventId(newEvent._id);
+        // First time saving - create new event
+        const response = await addEvent(eventData);
+        const newEventId = response.data._id || response._id;
+        setSavedEventId(newEventId);
         toast.success('Event added successfully!');
       }
       setTimeout(() => navigate('/events'), 100);
@@ -134,9 +146,15 @@ const AddEventFlow = () => {
           if (isEditMode) {
             await updateEvent(eventId, fullData);
             toast.success('Event updated successfully!');
+          } else if (savedEventId) {
+            // If we have a saved event ID, update the existing event
+            await updateEvent(savedEventId, fullData);
+            toast.success('Event updated successfully!');
           } else {
-            const newEvent = await addEvent(fullData);
-            setSavedEventId(newEvent._id);
+            // First time saving - create new event
+            const response = await addEvent(fullData);
+            const newEventId = response.data._id || response._id;
+            setSavedEventId(newEventId);
             toast.success('Event added successfully!');
           }
           navigate('/events');

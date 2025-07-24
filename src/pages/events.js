@@ -121,6 +121,7 @@ const handleDraft = (eventId) => {
     { header: "Title" },
     { header: "Date" },
     { header: "Venue" },
+    { header: "Status" },
     { header: "Actions" }
   ];
 
@@ -131,6 +132,7 @@ const handleDraft = (eventId) => {
       <td>{event.title}</td>
       <td>{new Date(event.date).toLocaleDateString()}</td>
       <td>{event.venue}</td>
+      <td>{event.status === 'publish' ? 'Published' : 'Draft'}</td>
       <td className='event-actions'>
           {/* Edit */}
           <a
