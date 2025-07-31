@@ -118,7 +118,7 @@ const AdminBooking = () => {
       }
     });
   };
- 
+
   const handleEventSelect = async (event) => {
     setSelectedEvent(event);
     setSelectedSeats([]);

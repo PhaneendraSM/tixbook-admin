@@ -412,6 +412,64 @@ p{
 }
 /* event css end */
 
+
+.ticket-rhs {
+  /* border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-left: 1px dashed #ccc !important;
+  border-radius: 8px; */
+}
+
+.ticket-rhs:before {
+       content: "";
+    position: absolute;
+    display: block;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: #fff;
+    border-radius: 50%;
+    left: -1.3rem;
+    top: -1.4rem;
+    border-color: #ccc;
+    border: 1px solid #ccc;
+    z-index: 1;
+}
+
+.ticket-rhs:after {
+      content: "";
+    position: absolute;
+    display: block;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: #fff;
+    border-radius: 50%;
+    left: -1.3rem;
+    bottom: -1.4rem;
+    border-color: #ccc;
+    border: 1px solid #ccc;
+    z-index: 1;
+}
+
+.ticket-info {
+      border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+
+}
+#bookingModal .ticket-rhs {
+  border-top: unset;
+  border-bottom: unset;
+  border-right: unset;
+  border-radius: 0;
+}
+
+#bookingModal .modal-content {
+  border: 0 !important;
+}
+#bookingModal .ticket-rhs:before, #bookingModal .ticket-rhs:after{
+  background: #7f7f7f !important;
+  border: 0 !important;
+}
 /* media queries */
 @media (min-width: 200px) and (max-width: 768px) {
     html {
@@ -435,4 +493,154 @@ p{
     html {
         font-size:20px
     }
+}
+
+/* Booking Ticket Modal Styles */
+.modal-ticket {
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  max-height: 80vh;
+  background: #ffffff;
+  position: relative;
+}
+
+/* PDF Generation Styles */
+.modal-ticket.pdf-ready {
+  box-shadow: none;
+  border: 1px solid #ddd;
+  margin: 0;
+  padding: 0;
+}
+
+.modal-ticket .col-md-8 {
+  min-height: 400px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-ticket .col-md-8 img {
+  /* width: 100%;
+  height: 100%;
+  object-fit: cover; */
+}
+
+.ticket-rhs {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem !important;
+}
+
+.ticket-rhs h6 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* QR Code Container Styles */
+.qr-container {
+  /* background: rgba(255, 255, 255, 0.5); */
+  border-radius: 15px;
+  padding: 1rem;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  position: relative;
+  width: fit-content;
+  margin: auto;
+  backdrop-filter: blur(10px);
+}
+
+/* Navigation Arrow Styles */
+.qr-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.7);
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.qr-nav-button:hover {
+  background: rgba(0,0,0,0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.qr-nav-button.prev {
+  left: -3.5rem;
+}
+
+.qr-nav-button.next {
+  right: -3.5rem;
+}
+
+/* Dots Indicator Styles */
+.qr-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.qr-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.qr-dot.active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+.qr-dot.inactive {
+  background: rgba(255,255,255,0.5);
+}
+
+.qr-dot:hover {
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .modal-ticket {
+    flex-direction: column;
+  }
+  
+  .modal-ticket .col-md-8 {
+    min-height: 250px;
+  }
+  
+  .ticket-rhs {
+    min-height: 300px;
+    padding: 1.5rem !important;
+  }
+  
+  .qr-nav-button {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .qr-nav-button.prev {
+    left: -2.5rem;
+  }
+  
+  .qr-nav-button.next {
+    right: -2.5rem;
+  }
 }

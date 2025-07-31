@@ -183,6 +183,30 @@ const SeatMapEditor = () => {
     if (editingRowName && rowNameInputRef.current) rowNameInputRef.current.focus();
   }, [editingRowName]);
 
+  // Add click outside handler for row menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showRowMenu) {
+        // Check if click is outside the row menu
+        const menuElement = document.querySelector('.row-menu-dropdown');
+        const menuButton = document.querySelector('.row-menu-button');
+        
+        if (menuElement && !menuElement.contains(event.target) && 
+            menuButton && !menuButton.contains(event.target)) {
+          setShowRowMenu(null);
+        }
+      }
+    };
+
+    if (showRowMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showRowMenu]);
+
   useEffect(() => {
     const loadSeatingPlan = async () => {
       try {
@@ -235,7 +259,6 @@ const SeatMapEditor = () => {
           seatmap.sections.forEach(section => {
             console.log('Processing section:', section.name);
             const sectionSeats = [];
-            let seatNumber = 1; // Start seat numbering at 1 for each section (not per row)
             
             // Process each row in the section
             if (Array.isArray(section.rows)) {
@@ -248,14 +271,14 @@ const SeatMapEditor = () => {
                     const isSpace = (!seat.level || seat.level === '') && (!seat.price || seat.price === 0);
 
                     if (isSpace) {
-                      // Add a space item, do NOT increment seatNumber
+                      // Add a space item
                       sectionSeats.push({
                         id: seat._id || seat.id || `space-${Date.now()}-${Math.random()}`,
                         label: '', // No label for space
                         type: 'space'
                       });
                     } else {
-                      // This is a real seat, assign the next seat number
+                      // This is a real seat, use the seatNumber from API
                       const categoryId = (seat.level || '').toLowerCase();
                       // Dynamically create category if it doesn't exist
                       if (categoryId && !extractedCategories[categoryId]) {
@@ -271,7 +294,7 @@ const SeatMapEditor = () => {
 
                       sectionSeats.push({
                         id: seat._id || seat.id,
-                        label: seatNumber.toString(),
+                        label: seat.seatNumber ? seat.seatNumber.toString() : seat.label || '',
                         type: 'seat',
                         category: categoryId,
                         price: Number(seat.price) || 0,
@@ -279,7 +302,6 @@ const SeatMapEditor = () => {
                         name: seat.name,
                         color: seat.color || null
                       });
-                      seatNumber++; // Only increment for real seats
                     }
                   });
                 }
@@ -642,6 +664,7 @@ const SeatMapEditor = () => {
     const newRowName = `${baseName} ${existingRows.length + 1}`;
 
     // Duplicate seats with new numbers
+    let seatCounter = 0; // Counter for actual seats only (excluding spaces)
     const duplicatedSeats = originalRow.map((seat, index) => {
       if (seat.type === 'space') {
         return {
@@ -649,7 +672,8 @@ const SeatMapEditor = () => {
           id: `${newRowName.toLowerCase().replace(/ /g, '')}-space-${Date.now()}-${index}`
         };
       } else {
-        const newSeatNumber = nextSeatNumber + index;
+        const newSeatNumber = nextSeatNumber + seatCounter;
+        seatCounter++; // Only increment for actual seats
         return {
           ...seat,
           id: `${newRowName.toLowerCase().replace(/ /g, '')}-${newSeatNumber}`,
@@ -1684,13 +1708,13 @@ const SeatMapEditor = () => {
                     </button>
                     <button 
                       onClick={() => setShowRowMenu(showRowMenu === rowId ? null : rowId)} 
-                      className="btn btn-light rounded-circle"
+                      className="btn btn-light rounded-circle row-menu-button"
                       onMouseDown={(e) => e.stopPropagation()}
                     >
                       <Menu size={18} />
                     </button>
                     {showRowMenu === rowId && (
-                      <div className="dropdown-menu d-block position-absolute shadow p-2" style={{ right: '3rem', zIndex: 20, width: 'max-content' }}>
+                      <div className="dropdown-menu d-block position-absolute shadow p-2 row-menu-dropdown" style={{ right: '3rem', zIndex: 20, width: 'max-content' }}>
                         <div className="d-flex align-items-center mb-2">
                           <input 
                             type="number" 

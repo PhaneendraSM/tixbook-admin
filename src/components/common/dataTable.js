@@ -17,7 +17,9 @@ const DataTable = ({
       <thead>
         <tr>
           {columns.map((col, idx) => (
-            <th key={idx}>{col.header}</th>
+            <th key={idx} style={col.width ? { width: col.width } : {}}>
+              {col.header}
+            </th>
           ))}
         </tr>
       </thead>
